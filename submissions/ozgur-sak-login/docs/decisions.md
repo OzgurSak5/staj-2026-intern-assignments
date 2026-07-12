@@ -23,3 +23,9 @@ yamalı 2.9.0'a yükselttim.
 Şu an appsettings.json'da. Dev şifresi gerçek bir sır değil ama
 gerçek deployment öncesi user-secrets / ortam değişkenlerine taşınacak,
 böylece git'e hiç girmez.
+
+## AuthResponse'ta Password veya PasswordHash yok.
+Kullanıcının şifresini/hash'ini asla API cevabında göndermeyiz.
+Bu bir güvenlik kuralı.
+Şifreler bcrypt ile hash'lenerek saklanıyor — düz metin veya çözülebilir şifreleme değil.
+Veritabanı çalınsa bile şifreler geri elde edilemez.
