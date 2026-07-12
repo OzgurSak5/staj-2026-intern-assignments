@@ -8,10 +8,12 @@ namespace Auth.Api.Services;
 public class AuthService
 {
     private readonly AppDbContext _db;
+    private readonly TokenService _tokenService;
 
-    public AuthService(AppDbContext db)
+    public AuthService(AppDbContext db,TokenService tokenService)
     {
         _db = db;
+        _tokenService = tokenService;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -20,7 +22,7 @@ public class AuthService
 
         if (emailExists)
         {
-            throw new InvalidOperationException("Email already exists.");
+            throw new ConflictException("Email already exists.");
         }
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -36,5 +38,19 @@ public class AuthService
         await _db.SaveChangesAsync();
 
         return new AuthResponse(user.Id, user.Email);
+    }
+
+    public async Task<TokenResponse> LoginAsync(LoginRequest request)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            throw new UnauthorizedException("Invalid email or password.");
+        }
+
+        var (token, expiresInSeconds) = _tokenService.CreateAccessToken(user);
+
+        return new TokenResponse(token, expiresInSeconds);
     }
 }
