@@ -47,3 +47,9 @@ dönüyor. Spec'in istediği RFC 9457 standardı.
 ## JWT: kısa ömürlü access token
 Access token 15 dakika geçerli. Çalınsa bile zarar sınırlı. JWT gizli
 anahtarla imzalanıyor, sahte token üretilemez. (Refresh token akışı sonra.)
+
+## Swagger + OpenApi 2.x uyumsuzluğu
+Swashbuckle 10.x, Microsoft.OpenApi 2.x ile AddSecurityRequirement'ı
+sessizce yok sayıyordu (security bölümü swagger.json'a yazılmıyordu).
+Çözüm: IDocumentFilter ile security requirement'ı dokümana elle ekledim.
+CVE düzeltmesi için yükselttiğimiz OpenApi 2.9.0'ı korudum.
