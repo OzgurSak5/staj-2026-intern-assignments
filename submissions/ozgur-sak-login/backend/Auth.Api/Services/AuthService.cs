@@ -9,11 +9,13 @@ public class AuthService
 {
     private readonly AppDbContext _db;
     private readonly TokenService _tokenService;
+    private readonly IConfiguration _config;
 
-    public AuthService(AppDbContext db,TokenService tokenService)
+    public AuthService(AppDbContext db,TokenService tokenService, IConfiguration config)
     {
         _db = db;
         _tokenService = tokenService;
+        _config = config;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -49,8 +51,49 @@ public class AuthService
             throw new UnauthorizedException("Invalid email or password.");
         }
 
-        var (token, expiresInSeconds) = _tokenService.CreateAccessToken(user);
+        var (accessToken, expiresInSeconds) = _tokenService.CreateAccessToken(user);
+        var refreshToken = await CreateRefreshTokenAsync(user);
 
-        return new TokenResponse(token, expiresInSeconds);
+        return new TokenResponse(accessToken, refreshToken, expiresInSeconds);
+    }
+
+    public async Task<TokenResponse> RefreshAsync(RefreshRequest request)
+    {
+        var tokenHash = _tokenService.HashToken(request.RefreshToken);
+        var stored = await _db.RefreshTokens.Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
+
+        if (stored is null || !stored.IsActive)
+        {
+            throw new UnauthorizedException("Invalid refresh token.");
+        }
+
+        stored.RevokedAt = DateTime.UtcNow;
+
+        var (accessToken, expiresInSeconds) = _tokenService.CreateAccessToken(stored.User);
+        var newRefreshToken = await CreateRefreshTokenAsync(stored.User);
+
+        await _db.SaveChangesAsync();
+
+        return new TokenResponse(accessToken, newRefreshToken, expiresInSeconds);
+    }
+
+
+    private async Task<string> CreateRefreshTokenAsync(User user)
+    {
+        var rawToken = _tokenService.GenerateRefreshToken();
+        var days = int.Parse(_config["Jwt:RefreshTokenDays"]!);
+
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = _tokenService.HashToken(rawToken),
+            ExpiresAt = DateTime.UtcNow.AddDays(days)
+        };
+
+        _db.RefreshTokens.Add(refreshToken);
+        await _db.SaveChangesAsync();
+        return rawToken;
     }
 }

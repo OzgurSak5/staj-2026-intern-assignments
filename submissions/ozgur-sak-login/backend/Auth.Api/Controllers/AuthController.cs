@@ -42,4 +42,11 @@ public class AuthController : ControllerBase
 
         return Ok(new { userId, email });
     }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+    {
+        var response = await _authService.RefreshAsync(request);
+        return Ok(response);
+    }
 }
