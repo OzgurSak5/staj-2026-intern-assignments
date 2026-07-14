@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: auth-pg
+    environment:
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth-pg-data:/var/lib/postgresql/data
+
+volumes:
+  auth-pg-data:
