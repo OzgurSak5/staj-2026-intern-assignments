@@ -53,3 +53,12 @@ Swashbuckle 10.x, Microsoft.OpenApi 2.x ile AddSecurityRequirement'ı
 sessizce yok sayıyordu (security bölümü swagger.json'a yazılmıyordu).
 Çözüm: IDocumentFilter ile security requirement'ı dokümana elle ekledim.
 CVE düzeltmesi için yükselttiğimiz OpenApi 2.9.0'ı korudum.
+
+## Logout: geçersiz token'da da 204
+Logout, token geçerli olsun olmasın 204 döner. İki sebep:
+1 => Logout niyeti her durumda karşılanır — token zaten geçersizse bile
+    kullanıcının amacı (oturum yok) gerçekleşmiştir.
+2 => Token geçerli veya geçersiz ayrımı bilgi sızdırır; login'deki
+    muğlak hata mesajıyla tutarlı bir güvenlik duruşu tercih ettim.
+Alternatif (geçersizde 401 dönmek) daha dürüst fakat saldırganın
+hangi token'ların geçerli olduğunu anlamasına yol açar.
