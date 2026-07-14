@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,6 +20,16 @@ public class AppDbContext : DbContext
         {
             entity.HasIndex(u => u.Email).IsUnique();
             entity.Property(u => u.Email).HasMaxLength(256);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasIndex(rt => rt.TokenHash);
+
+            entity.HasOne(rt => rt.User)
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
