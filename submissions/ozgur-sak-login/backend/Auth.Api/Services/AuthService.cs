@@ -78,6 +78,18 @@ public class AuthService
         return new TokenResponse(accessToken, newRefreshToken, expiresInSeconds);
     }
 
+    public async Task LogoutAsync(RefreshRequest request)
+    {
+        var tokenHash = _tokenService.HashToken(request.RefreshToken);
+        var stored = await _db.RefreshTokens.FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
+
+        if (stored is not null && stored.IsActive)
+        {
+            stored.RevokedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+        }
+    }
+
 
     private async Task<string> CreateRefreshTokenAsync(User user)
     {

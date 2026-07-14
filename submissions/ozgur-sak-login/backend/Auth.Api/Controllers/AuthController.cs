@@ -49,4 +49,11 @@ public class AuthController : ControllerBase
         var response = await _authService.RefreshAsync(request);
         return Ok(response);
     }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] RefreshRequest request)
+    {
+        await _authService.LogoutAsync(request);
+        return NoContent();
+    }
 }
