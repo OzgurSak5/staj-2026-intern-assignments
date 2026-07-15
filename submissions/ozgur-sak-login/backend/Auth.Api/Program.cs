@@ -41,6 +41,17 @@ builder.Services.AddExceptionHandler(_ => { });
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSection["Key"]!;
 
+if(string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("Jwt:Key is not configured. Development: dotnet user-secrets set \"Jwt:Key\" \"<key>\". " +
+        "Docker: set the JWT_KEY environment variable. See .env.example");
+}
+
+if(Encoding.UTF8.GetByteCount(jwtKey) < 32)
+{
+    throw new InvalidOperationException("Jwt:Key must be at least 32 bytes (HS256 requirement). Generate a new key, see .env.example");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
