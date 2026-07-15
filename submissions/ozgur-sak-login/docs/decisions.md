@@ -19,11 +19,6 @@ Hibernate'in ddl-auto=update yaklaşımı yerine migration kullandım.
 (CVE-2026-49451, DoS). NuGet denetimi (NU1903) restore'da yakaladı,
 yamalı 2.9.0'a yükselttim.
 
-## Connection string konumu (geçici)
-Şu an appsettings.json'da. Dev şifresi gerçek bir sır değil ama
-gerçek deployment öncesi user-secrets / ortam değişkenlerine taşınacak,
-böylece git'e hiç girmez.
-
 ## API cevabında şifre/hash dönülmüyor
 AuthResponse DTO'sunda Password veya PasswordHash alanı yok. Kullanıcının
 şifresini veya hash'ini hiçbir API cevabında döndürmeyiz. Gelen ve dönen
@@ -62,3 +57,38 @@ Logout, token geçerli olsun olmasın 204 döner. İki sebep:
     muğlak hata mesajıyla tutarlı bir güvenlik duruşu tercih ettim.
 Alternatif (geçersizde 401 dönmek) daha dürüst fakat saldırganın
 hangi token'ların geçerli olduğunu anlamasına yol açar.
+
+## Secret yönetimi: user-secrets (local) + .env (Docker)
+**Başta appsettings.json'da tutuyordum, "geçici" diye not düşmüştüm — bu iş o notun karşılığı.**
+.NET'in config sistemi katmanlıdır. appsettings.json => appsettings.{Env}.json =>
+user-secrets (sadece Development) => environment variables. Bir sonraki katman öncekini ezer.
+Kod her zaman Configuration'dan okuduğu için değerin hangi katmandan geldiğini bilmiyor.
+Bu yüzden TokenService'teki okuma satırına hiç dokunmadım. Program.cs'te sadece fail-fast 
+kontrolü ekledim, okuma şekli aynı kaldı.Kendi makinemde çalışırken user-secrets kullanıyorum.
+Bunun güzel tarafı değerlerin proje klasörünün içinde hiç durmaması. Bilgisayarımda başka bir yerde tutuluyorlar.
+Yani yanlışlıkla commit'lemem mümkün değil, çünkü git'in baktığı yerde öyle bir dosya yok.
+Docker'da ise user-secrets çalışmıyor, container o klasörü göremiyor. Orada
+.env dosyasından besleniyoruz. Zaten spec'te ".env ile secret yönetimi" deniyor.
+
+## JWT key rotation
+Eski key commit edilmişti. Dosyadan silmek yetmiyor, git eski halleri saklıyor.
+Bir kere commit'lenirse o key artık herkesin. Tek çözüm yenisini üretmek; eskisi
+geçmişte kalıyor ama artık hiçbir token'ı doğrulamadığı için değersiz.
+Geçmişi temizlemeyi (filter-repo) yapmadım: tüm commit'lerin kimliği değişir,
+merge edilmiş PR'lar bozulur, Nisa'nın klonu çöpe gider. Dev ortamı key'i için değmez.
+
+## Key üretimi: Get-Random değil, RandomNumberGenerator
+Get-Random rastgele görünen ama hesaplanabilir sayılar üretiyor. İmzalama key'i
+tahmin edilebilirse saldırgan istediği kullanıcı adına token uydurur. 32 byte,
+çünkü HS256 arka planda SHA-256 kullanıyor ve çıktısı 32 byte.
+
+## Fail-fast: key yoksa açılışta patla
+appsettings.json'da anahtarı silmedim, boşalttım. "Bu ayar var, değerini dışarıdan
+ver" demek için. Ama boş string'le uygulama sorunsuz açılıp ilk login'de anlaşılmaz
+bir 500 verirdi. Hatanın sebebinden uzakta çıkması en kötüsü. Şimdi açılışta
+patlıyor ve mesaj hangi komutu çalıştıracağını da söylüyor.
+
+## Bilinen tradeoff: devpassword iki yerde
+Postgres şifresi hem .env'de hem user-secrets'taki connection string'in içinde.
+Değişirse iki yeri de güncellemek lazım. Connection string'i kodda parçalardan
+birleştirebilirdim ama bu proje için gereksiz karmaşıklık. Bilinçli tercih.
