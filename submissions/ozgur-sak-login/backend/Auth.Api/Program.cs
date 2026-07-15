@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,10 +38,41 @@ builder.Services.AddSwaggerGen(options =>
     options.DocumentFilter<BearerSecurityDocumentFilter>();
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, _) =>
+    {
+        var retrySeconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+            ? (int)retryAfter.TotalSeconds
+            : 60;
+
+        context.HttpContext.Response.Headers.RetryAfter = retrySeconds.ToString();
+
+        await Results.Problem(
+            title: "Too many requests",
+            detail: $"Too many login attempts. Please try again in {retrySeconds} seconds.",
+            statusCode: StatusCodes.Status429TooManyRequests
+        ).ExecuteAsync(context.HttpContext);
+    };
+
+    options.AddPolicy("login-ip", context =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(5),
+                SegmentsPerWindow = 5,
+                QueueLimit = 0
+            }));
+});
+
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler(_ => { });
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSection["Key"]!;
+var jwtKey = jwtSection["Key"];
 
 if(string.IsNullOrWhiteSpace(jwtKey))
 {
@@ -103,6 +136,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

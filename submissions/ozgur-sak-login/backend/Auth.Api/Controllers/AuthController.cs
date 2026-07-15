@@ -4,6 +4,7 @@ using Auth.Api.Dtos;
 using Auth.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Auth.Api.Controllers;
 
@@ -25,6 +26,7 @@ public class AuthController : ControllerBase
         return Created($"/users/{response.UserId}", response);
     }
 
+    [EnableRateLimiting("login-ip")]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -56,4 +58,5 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync(request);
         return NoContent();
     }
+
 }
