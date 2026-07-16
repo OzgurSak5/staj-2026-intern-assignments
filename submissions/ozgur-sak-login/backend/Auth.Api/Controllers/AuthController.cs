@@ -28,7 +28,8 @@ public class AuthController : ControllerBase
 
     [EnableRateLimiting("login-ip")]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
         return Ok(response);
