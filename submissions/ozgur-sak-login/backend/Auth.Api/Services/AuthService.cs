@@ -20,7 +20,9 @@ public class AuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var emailExists = await _db.Users.AnyAsync(u => u.Email == request.Email);
+        var email = NormalizeEmail(request.Email);
+        
+        var emailExists = await _db.Users.AnyAsync(u => u.Email == email);
 
         if (emailExists)
         {
@@ -32,7 +34,7 @@ public class AuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Email = request.Email,
+            Email = email,
             PasswordHash = passwordHash
         };
 
@@ -44,7 +46,8 @@ public class AuthService
 
     public async Task<TokenResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var email = NormalizeEmail(request.Email);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
@@ -90,6 +93,7 @@ public class AuthService
         }
     }
 
+    public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 
     private async Task<string> CreateRefreshTokenAsync(User user)
     {
