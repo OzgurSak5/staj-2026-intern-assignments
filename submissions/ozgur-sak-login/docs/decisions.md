@@ -92,3 +92,52 @@ patlıyor ve mesaj hangi komutu çalıştıracağını da söylüyor.
 Postgres şifresi hem .env'de hem user-secrets'taki connection string'in içinde.
 Değişirse iki yeri de güncellemek lazım. Connection string'i kodda parçalardan
 birleştirebilirdim ama bu proje için gereksiz karmaşıklık. Bilinçli tercih.
+
+## Rate limiting: iki sayaç, iki katman
+IP sayacı middleware'de ve her 5 dakikada bir 20 deneme izin veriyor. Email sayacı AuthService'te
+her 5 dakikada bir 5 deneme. Sebebi teknik, IP HttpContext'te hazır duruyor. Email ise istek
+gövdesinde ve gövde bir kere okunuyor. Middleware'de gövdeyi okursam model binding'e bir şey kalmaz.
+Her sayaç, ihtiyacı olan bilginin zaten hazır olduğu katmanda.
+Tek başına IP dağıtık saldırıyı kaçırır. Tek başına email credential stuffing'i kaçırır
+(saldırgan her hesaba 1 deneme yapar, limit hiç dolmaz). İkisi birbirinin açığını kapatıyor.
+
+## Sliding window, fixed window değil
+Fixed window'da pencere sınırında iki kat burst mümkün: 12:04:59'da 5 istek, 12:05:01'de 5
+daha, iki pencere de kurallara uymuş görünür. bcrypt yavaş olduğu için bu CPU spike'ı demek.
+Token bucket burst'e izin vermek üzere tasarlanmış, login'de istemediğim şey tam da o.
+Concurrency hızı değil eşzamanlılığı ölçüyor, sıralı istekleri hiç yakalamaz.
+
+## Email sayacı sadece başarısızlıkları sayıyor
+Başarılı login, hesabın sahibinin geldiğinin kanıtıdır. Saldırı sayacına yazmak anlamsız.
+Çünkü meşru kullanıcı ne kadar girip çıkarsa çıksın kilitlenmiyor.
+Bedeli: önce peek (permitCount: 0) sonra başarısızsa tüket. İki ayrı işlem, arada yarış var
+(TOCTOU) — eşzamanlı istekler limiti biraz aşabilir. IP sayacı hacmi zaten kıstığı için
+kabul ettim.
+
+## Sayaçlar bellekte, süreç başına
+Tek instance çalıştığım için sorun değil. İki container'da çalışsa iki ayrı sayaç olur,
+limit fiilen ikiye katlanır. Ölçeklenirse Redis gibi paylaşımlı bir sayaç lazım.
+
+## Retry-After: metadata yoksa 60
+Sliding window bu metadata'yı her durumda vermiyor, tüm istekler tek segmente sıkışınca
+tahmin üretemiyor, yani en çok lazım olduğu anda yok. Fallback pencere/segment = 60 saniye.
+Saldırgana ne zaman devam edeceğini söylüyor ama HTTP standardı bu header'ı bunun için
+tanımlamış, meşru client'a faydası daha büyük.
+
+## Log seviyeleri: başarısız login Information, rate limit Warning
+Her başarısız login bir tehlike değil. Kullanıcı şifresini yanlış yazmıştır, günde
+binlerce kez olur. Bunlara Warning dersem o kanal çöpe döner, gerçek bir saldırı geldiğinde
+aralarında kaybolur. Tehlike sinyali "şifre yanlış" değil, "bu hesaba beş kez üst üste yanlış 
+girildi".Yani limiter'ın tetiklenmesi. Zaten limiter'ın işi gürültüyle sinyali ayırmak.
+Şifreyi loglamıyorum. Email'i logluyorum: log'ları görebilen biri hangi hesapların
+kayıtlı olduğunu da görür, ama saldırıyı hiç fark edememek daha kötü.
+
+## Email normalizasyonu: ToLowerInvariant
+Register ve login'de email'i trim'leyip küçük harfe çeviriyorum. Öncesinde Postgres
+karşılaştırmayı büyük/küçük harfe duyarlı yaptığı için TEST@x.com ile test@x.com iki
+ayrı kullanıcıydı insan kendi hesabına giremiyordu.
+ToLower() değil ToLowerInvariant(): Türkçe'de I'nin küçüğü ı. ToLower() makinenin dil
+ayarına baktığı için aynı kod bende başka, Nisa'da başka sonuç verebilirdi. Türkçe
+Windows'tayım, bu teorik bir risk değil. Rate limiter da aynı fonksiyonu çağırıyor. 
+Çağırmasaydı saldırgan harf büyüklüğünü değiştirerek her varyasyona ayrı bir kova açtırır,
+sayacı işe yaramaz hale getirirdi.

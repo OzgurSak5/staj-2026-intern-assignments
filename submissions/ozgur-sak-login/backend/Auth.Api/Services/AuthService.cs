@@ -10,17 +10,24 @@ public class AuthService
     private readonly AppDbContext _db;
     private readonly TokenService _tokenService;
     private readonly IConfiguration _config;
+    private readonly LoginAttemptLimiter _loginLimiter;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(AppDbContext db,TokenService tokenService, IConfiguration config)
+
+    public AuthService(AppDbContext db,TokenService tokenService, IConfiguration config, LoginAttemptLimiter loginLimiter, ILogger<AuthService> logger)
     {
         _db = db;
         _tokenService = tokenService;
         _config = config;
+        _loginLimiter = loginLimiter;
+        _logger = logger;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var emailExists = await _db.Users.AnyAsync(u => u.Email == request.Email);
+        var email = NormalizeEmail(request.Email);
+        
+        var emailExists = await _db.Users.AnyAsync(u => u.Email == email);
 
         if (emailExists)
         {
@@ -32,7 +39,7 @@ public class AuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Email = request.Email,
+            Email = email,
             PasswordHash = passwordHash
         };
 
@@ -44,10 +51,20 @@ public class AuthService
 
     public async Task<TokenResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var email = NormalizeEmail(request.Email);
+
+        if (_loginLimiter.IsBlocked(email))
+        {
+            _logger.LogWarning("Login blocked by email rate limit. Email: {Email}", email);
+            throw new TooManyRequestsException("Too many login attempts. Please try again later.");
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
+            _loginLimiter.RecordFailure(email);
+            _logger.LogInformation("Failed login attempt. Email: {Email}", email);
             throw new UnauthorizedException("Invalid email or password.");
         }
 
@@ -90,6 +107,7 @@ public class AuthService
         }
     }
 
+    public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 
     private async Task<string> CreateRefreshTokenAsync(User user)
     {

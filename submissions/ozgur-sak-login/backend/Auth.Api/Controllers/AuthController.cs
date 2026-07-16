@@ -4,6 +4,7 @@ using Auth.Api.Dtos;
 using Auth.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Auth.Api.Controllers;
 
@@ -25,8 +26,10 @@ public class AuthController : ControllerBase
         return Created($"/users/{response.UserId}", response);
     }
 
+    [EnableRateLimiting("login-ip")]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
         return Ok(response);
@@ -56,4 +59,5 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync(request);
         return NoContent();
     }
+
 }
