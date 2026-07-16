@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddSingleton<LoginAttemptLimiter>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -113,8 +114,14 @@ app.UseExceptionHandler(handler =>
         {
             ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
             UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            TooManyRequestsException => (StatusCodes.Status429TooManyRequests, "Too many requests"),
             _ => (StatusCodes.Status500InternalServerError, "Server error")
         };
+
+        if (exception is TooManyRequestsException)
+        {
+            context.Response.Headers.RetryAfter = "60";
+        }
 
         await Results.Problem(
             title: title,
