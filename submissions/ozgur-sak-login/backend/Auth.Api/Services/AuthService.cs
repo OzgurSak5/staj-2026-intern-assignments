@@ -11,13 +11,16 @@ public class AuthService
     private readonly TokenService _tokenService;
     private readonly IConfiguration _config;
     private readonly LoginAttemptLimiter _loginLimiter;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(AppDbContext db,TokenService tokenService, IConfiguration config, LoginAttemptLimiter loginLimiter)
+
+    public AuthService(AppDbContext db,TokenService tokenService, IConfiguration config, LoginAttemptLimiter loginLimiter, ILogger<AuthService> logger)
     {
         _db = db;
         _tokenService = tokenService;
         _config = config;
         _loginLimiter = loginLimiter;
+        _logger = logger;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -52,6 +55,7 @@ public class AuthService
 
         if (_loginLimiter.IsBlocked(email))
         {
+            _logger.LogWarning("Login blocked by email rate limit. Email: {Email}", email);
             throw new TooManyRequestsException("Too many login attempts. Please try again later.");
         }
 
@@ -60,6 +64,7 @@ public class AuthService
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             _loginLimiter.RecordFailure(email);
+            _logger.LogInformation("Failed login attempt. Email: {Email}", email);
             throw new UnauthorizedException("Invalid email or password.");
         }
 

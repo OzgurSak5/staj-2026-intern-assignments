@@ -45,9 +45,15 @@ builder.Services.AddRateLimiter(options =>
 
     options.OnRejected = async (context, _) =>
     {
+        var logger = context.HttpContext.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("RateLimiting");
+
+        var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        logger.LogWarning("Login blocked by IP rate limit. IP: {Ip}", ip);
+
         var retrySeconds = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
-            ? (int)retryAfter.TotalSeconds
-            : 60;
+            ? (int)retryAfter.TotalSeconds: 60;
 
         context.HttpContext.Response.Headers.RetryAfter = retrySeconds.ToString();
 
