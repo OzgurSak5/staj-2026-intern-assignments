@@ -141,3 +141,23 @@ ayarına baktığı için aynı kod bende başka, Nisa'da başka sonuç verebili
 Windows'tayım, bu teorik bir risk değil. Rate limiter da aynı fonksiyonu çağırıyor. 
 Çağırmasaydı saldırgan harf büyüklüğünü değiştirerek her varyasyona ayrı bir kova açtırır,
 sayacı işe yaramaz hale getirirdi.
+
+## IExceptionHandler: lambda handler'ı sınıfa taşıdım
+Handler Program.cs'te çalışan bir lambda'ydı. Sorun şu ki, .NET 10 handler handle etmiyorsa
+Error loglamayayım diyor, ama bunu sadece DI'a kayıtlı bir IExceptionHandler için yapıyor.
+Lambda o arayüzü uygulamadığı için framework onu handler saymıyordu. Her 401'i, her 409'u
+tam stack trace'le Error olarak logluyordu. Beş başarısız login = 120 satır gürültü.
+Sınıfa taşıyınca framework doğru sinyali aldı, gürültü bitti.
+
+## Bilinmeyen exception'da false dönüyorum
+true = "ben hallettim, sen karışma". Postgres çökerse true dersem framework loglamayı bırakır
+En çok bilgiye ihtiyacım olan anda hiçbir şey yapamam. false diyorum çünkü framework normal hata yoluna
+düşüyor, stack trace'i tutuyor. Bedava gelen kazanç ise false dönünce cevabı ben yazmıyorum.
+Yani eskiden istemciye giden (exception.Message) artık gitmiyor. Npgsql'in mesajı host/DB/kullanıcı adı içerebiliyordu.
+bildiğimi ele aldım, bilmediğime karışmadım.
+
+## UseStatusCodePages: çıplak 401'i de Problem Details'e çevirdim
+[Authorize] başarısız olunca JWT middleware boş gövdeli 401 dönüyordu — orada exception
+fırlamadığı için handler'a hiç uğramıyor. Client bazen JSON bazen boş gövde görürse iki
+tarafta da özel durum yazmak gerekir. AddProblemDetails() zaten kayıtlıydı, eksik olan
+tetikleyiciydi.
