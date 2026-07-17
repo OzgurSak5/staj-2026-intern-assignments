@@ -8,8 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Auth.Api.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 
 // Add services to the container.
 
@@ -76,6 +78,7 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler(_ => { });
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -109,33 +112,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-app.UseExceptionHandler(handler =>
-{
-    handler.Run(async context =>
-    {
-        var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-        var exception = feature?.Error;
-
-        var (status, title) = exception switch
-        {
-            ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
-            UnauthorizedException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
-            TooManyRequestsException => (StatusCodes.Status429TooManyRequests, "Too many requests"),
-            _ => (StatusCodes.Status500InternalServerError, "Server error")
-        };
-
-        if (exception is TooManyRequestsException)
-        {
-            context.Response.Headers.RetryAfter = "60";
-        }
-
-        await Results.Problem(
-            title: title,
-            detail: exception?.Message,
-            statusCode: status
-        ).ExecuteAsync(context);
-    });
-});
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
