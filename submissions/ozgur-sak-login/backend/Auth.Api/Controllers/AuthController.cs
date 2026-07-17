@@ -48,9 +48,14 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
     public IActionResult Me()
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value ?? User.FindFirst(ClaimTypes.Email)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId) || string.IsNullOrEmpty(email))
+        {
+            return Unauthorized();
+        }
 
         return Ok(new { userId, email });
     }
