@@ -101,5 +101,36 @@ public class AuthFlowTests : IClassFixture<AuthApiFactory>
 
         var reuseResponse = await client.PostAsJsonAsync("/auth/refresh", new RefreshRequest(loginTokens.RefreshToken));
         Assert.Equal(HttpStatusCode.Unauthorized, reuseResponse.StatusCode);
-    }    
+    }
+
+    [Fact]
+    public async Task ChangePassword_ThenLoginWithNewPassword_Works()
+    {
+        var client = _factory.CreateClient();
+        var email = UniqueEmail();
+        var oldPassword = "OldPassword123!";
+        var newPassword = "NewPassword456!";
+
+        var registerResponse = await client.PostAsJsonAsync("/auth/register", new RegisterRequest(email, oldPassword));
+        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+
+        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(email, oldPassword));
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        var tokens = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>();
+        Assert.NotNull(tokens);
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+
+        var changeResponse = await client.PostAsJsonAsync("/auth/change-password", new ChangePasswordRequest(oldPassword, newPassword));
+        Assert.Equal(HttpStatusCode.NoContent, changeResponse.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = null;
+
+        var oldLoginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(email, oldPassword));
+        Assert.Equal(HttpStatusCode.Unauthorized, oldLoginResponse.StatusCode);
+
+        var newLoginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(email, newPassword));
+        Assert.Equal(HttpStatusCode.OK, newLoginResponse.StatusCode);
+    }
 }
