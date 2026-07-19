@@ -95,6 +95,19 @@ public class AuthService
         return new TokenResponse(accessToken, newRefreshToken, expiresInSeconds);
     }
 
+    public async Task ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash))
+        {
+            throw new UnauthorizedException("Invalid current password.");
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _db.SaveChangesAsync();
+    }
+
     public async Task LogoutAsync(RefreshRequest request)
     {
         var tokenHash = _tokenService.HashToken(request.RefreshToken);
