@@ -5,7 +5,6 @@ import '../../viewmodel/mixins/register_mixin.dart';
 import '../../../../core/route/app_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../viewmodel/cubits/auth_cubit.dart';
-import '../../repository/auth_repository.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auth_button.dart';

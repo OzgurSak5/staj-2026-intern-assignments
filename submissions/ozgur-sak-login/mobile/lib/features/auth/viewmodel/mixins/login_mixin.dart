@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubits/login_cubit.dart';
 import '../../view/screens/login_view.dart';
+import 'package:flutter/material.dart';
+import '../cubits/login_cubit.dart';
 
 mixin LoginMixin on State<LoginView> {
   // Form key
@@ -29,9 +29,9 @@ mixin LoginMixin on State<LoginView> {
 
   void submitForm() {
     context.read<LoginViewCubit>().submitForm(
-          formKey: formKey,
-          email: emailController.text.trim(),
-          password: passwordController.text,
-        );
+      formKey: formKey,
+      email: emailController.text.trim(),
+      password: passwordController.text,
+    );
   }
 }

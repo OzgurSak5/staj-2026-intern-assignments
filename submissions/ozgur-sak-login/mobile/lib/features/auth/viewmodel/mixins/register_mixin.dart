@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubits/register_cubit.dart';
 import '../../view/screens/register_view.dart';
+import 'package:flutter/material.dart';
+import '../cubits/register_cubit.dart';
 
- mixin RegisterMixin on State<RegisterView> {
+mixin RegisterMixin on State<RegisterView> {
   // Form key
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
