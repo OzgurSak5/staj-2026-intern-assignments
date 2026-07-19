@@ -143,7 +143,7 @@ Windows'tayım, bu teorik bir risk değil. Rate limiter da aynı fonksiyonu ça�
 sayacı işe yaramaz hale getirirdi.
 
 ## IExceptionHandler: lambda handler'ı sınıfa taşıdım
-Handler Program.cs'te çalışan bir lambda'ydı. Sorun şu ki, .NET 10 handler handle etmiyorsa
+Handler Program.cs'te çalışan bir lambda'ydı. Sorun şu ki, .NET 10 handler ele aldıysa
 Error loglamayayım diyor, ama bunu sadece DI'a kayıtlı bir IExceptionHandler için yapıyor.
 Lambda o arayüzü uygulamadığı için framework onu handler saymıyordu. Her 401'i, her 409'u
 tam stack trace'le Error olarak logluyordu. Beş başarısız login = 120 satır gürültü.
