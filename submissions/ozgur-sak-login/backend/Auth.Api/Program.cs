@@ -41,6 +41,10 @@ builder.Services.AddSwaggerGen(options =>
     options.DocumentFilter<BearerSecurityDocumentFilter>();
 });
 
+var rateLimitSection = builder.Configuration.GetSection("RateLimit");
+var ipPermitLimit = rateLimitSection.GetValue<int>("IpPermitLimit");
+var ipWindowMinutes = rateLimitSection.GetValue<int>("IpWindowMinutes");
+
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -71,8 +75,8 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new SlidingWindowRateLimiterOptions
             {
-                PermitLimit = 20,
-                Window = TimeSpan.FromMinutes(5),
+                PermitLimit = ipPermitLimit,
+                Window = TimeSpan.FromMinutes(ipWindowMinutes),
                 SegmentsPerWindow = 5,
                 QueueLimit = 0
             }));
@@ -80,7 +84,7 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler(_ => { });
+
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSection["Key"];
 
