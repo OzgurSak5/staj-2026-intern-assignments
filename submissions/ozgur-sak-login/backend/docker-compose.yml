@@ -10,5 +10,17 @@ services:
     volumes:
       - auth-pg-data:/var/lib/postgresql/data
 
+  api:
+    build: .
+    container_name: auth-api
+    depends_on:
+      - postgres
+    environment:
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      Jwt__Key: ${JWT_KEY}
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "5075:8080"
+
 volumes:
   auth-pg-data:
