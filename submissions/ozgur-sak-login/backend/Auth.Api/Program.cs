@@ -82,6 +82,16 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWebApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -131,6 +141,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowWebApp");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
