@@ -3,6 +3,7 @@ import Login from './Login'
 import Profile from './Profile'
 import './App.css'
 import ProtectedRoute from './ProtectedRoute'
+import Register from './Register'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Profile />
           </ProtectedRoute>}/>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register/>} />
       </Routes>
     </BrowserRouter>
   )

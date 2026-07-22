@@ -1,43 +1,38 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
 
-function Login() {
+function Register(){
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [message, setMessage] = useState('')
     const navigate = useNavigate()
 
-    const handleLogin = async () => {
-        setMessage('Giriş yapılıyor...')
+    const handleRegister = async () => {
+        setMessage('Kayıt olunuyor...')
 
-        try {
-            const response = await fetch('http://localhost:5075/auth/login', {
+        try{
+            const response = await fetch('http://localhost:5075/auth/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             })
 
-            if (response.ok) {
-                const data = await response.json()
-                localStorage.setItem('accessToken', data.accessToken)
-                localStorage.setItem('refreshToken', data.refreshToken)
-                setMessage('Giriş başarılı!')
-                navigate('/profile')
+            if(response.ok){
+                setMessage('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsun...')
+                navigate('/login')
             }
             else{
-                setMessage('Giriş başarısız. Kod: ' + response.status)
+                setMessage('Kayıt başarısız. Kod: ' + response.status)
             }
-        } catch (error) {
+        }
+        catch(error){
             setMessage('HATA! : ' + error)
         }
     }
 
-    return (
+    return(
         <div>
-            <h2>Giriş Yap</h2>
+            <h2>Kayıt ol</h2>
             <div>
                 <label>Email</label>
                 <input
@@ -56,14 +51,13 @@ function Login() {
                 />
             </div>
 
-            <button onClick={handleLogin}>
-                Giriş Yap
+            <button onClick={handleRegister}>
+                Kayıt Ol
             </button>
 
             <p>{message}</p>
-            <p>Hesabın yok mu? <Link to="/register">Kayıt ol</Link></p>
         </div>
     )
 }
 
-export default Login
+export default Register
