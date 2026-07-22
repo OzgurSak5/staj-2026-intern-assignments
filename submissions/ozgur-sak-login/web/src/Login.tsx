@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [message, setMessage] = useState('')
+    const navigate = useNavigate()
 
     const handleLogin = async () => {
         setMessage('Giriş yapılıyor...')
@@ -22,6 +24,7 @@ function Login() {
                 localStorage.setItem('accessToken', data.accessToken)
                 localStorage.setItem('refreshToken', data.refreshToken)
                 setMessage('Giriş başarılı!')
+                navigate('/profile')
             }
             else{
                 setMessage('Giriş başarısız. Kod: ' + response.status)
