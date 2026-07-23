@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react'
+import { apiFetch } from './api'
 
 function Profile() {
     const [email, setEmail] = useState('')
@@ -6,13 +7,7 @@ function Profile() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const accessToken = localStorage.getItem('accessToken')
-
-            const response = await fetch('http://localhost:5075/auth/me', {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-            })
+            const response = await apiFetch('http://localhost:5075/auth/me')
 
             if(response.ok) {
                 const data = await response.json()
