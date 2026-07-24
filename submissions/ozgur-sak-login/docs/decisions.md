@@ -178,3 +178,11 @@ döndü. Rotation çalışıyor (yeni token üretiliyor) ama eskisi hemen geçer
 kılınmıyor, kısa bir pencerede hâlâ kabul ediliyor. Production'a geçilirse bu
 sıkılaştırılmalı: kullanılan refresh token anında invalidate edilmeli, aksi halde
 çalınmış bir token'ın rotation sonrası da bir süre işe yaraması mümkün.
+
+## Migration'lar startup'ta uygulanıyor
+`Program.cs`'te uygulama açılırken `MigrateAsync()` çağrılıyor. Böylece
+`docker compose up` tek başına yeterli oluyor; ayrı bir migration adımı ve
+local .NET SDK gerekmiyor. Projeyi klonlayan kişi tek komutla ayağa kaldırıyor.
+Sınırı biliyorum. Birden fazla API instance'ı aynı anda açılırsa ikisi de
+migration çalıştırmaya kalkar. Tek instance'lık bu kapsamda sorun değil, ama
+ölçeklenirse migration ayrı bir deploy adımına taşınmalı.

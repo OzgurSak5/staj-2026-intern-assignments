@@ -36,15 +36,22 @@ web ve mobil onu ortak kullanır.
 git clone https://github.com/OzgurSak5/staj-2026-intern-assignments.git
 cd staj-2026-intern-assignments/submissions/ozgur-sak-login/backend
 
-# 2. PostgreSQL'i başlat (Docker)
-docker compose up -d
+# 2. Ortam değişkenlerini hazırla
+cp .env.example .env
+# .env içindeki JWT_KEY ve POSTGRES_PASSWORD değerlerini doldur.
+# JWT_KEY en az 32 byte olmalı (HS256 gerekliliği).
 
-# 3. Veritabanı şemasını oluştur (migration'ları uygula)
-cd Auth.Api
-dotnet ef database update
+# 3. Postgres + API'yi birlikte başlat (Docker)
+docker compose up -d --build
 
-# 4. API'yi çalıştır
-dotnet run
+> **Not:** `.env` olmadan uygulama başlamaz — `Jwt:Key` eksik veya 32 byte'tan
+> kısaysa fail-fast validasyonu devreye girer ve açıklayıcı bir hata verir.
+> Bilinçli tercih: eksik secret'ın sessizce varsayılana düşmesindense uygulamanın
+> hiç açılmaması daha güvenli.
+
+> **Migration'lar:** Container açılırken otomatik uygulanır (`MigrateAsync`).
+> Ayrıca `dotnet ef database update` çalıştırmaya gerek yok — local'de .NET SDK
+> kurulu olmasa bile proje ayağa kalkar.
 ```
 
 API çalışınca:
