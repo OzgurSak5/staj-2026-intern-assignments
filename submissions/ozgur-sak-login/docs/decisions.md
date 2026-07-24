@@ -160,4 +160,21 @@ bildiğimi ele aldım, bilmediğime karışmadım.
 [Authorize] başarısız olunca JWT middleware boş gövdeli 401 dönüyordu — orada exception
 fırlamadığı için handler'a hiç uğramıyor. Client bazen JSON bazen boş gövde görürse iki
 tarafta da özel durum yazmak gerekir. AddProblemDetails() zaten kayıtlıydı, eksik olan
-tetikleyiciydi.
+tetikleyiciydi.s
+
+## Web: token saklama, localStorage
+Access ve refresh token'ları localStorage'da tutuyorum, cookie değil. Backend zaten
+Authorization header bekliyor (Bearer token). Cookie'ye geçseydim CSRF koruması ve
+SameSite ayarları gibi ek bir katman gerekirdi. Bu projenin kapsamında gereksiz
+karmaşıklık. Nisa mobilde secure storage kullanıyor, web tarafında bunun karşılığı
+yok; localStorage XSS'e karşı o kadar güvenli değil. Bilinçli bir trade-off: staj
+projesi için kabul edilebilir, production'a çıksa cookie + httpOnly'ye taşınması
+gerekirdi.
+
+## Refresh token: tek kullanımlık invalidation şu an sıkı değil
+Test sırasında (React StrictMode'un useEffect'i iki kere çalıştırmasıyla) aynı
+refresh token'ın arka arkaya iki kez başarıyla kullanıldığını gördüm. İkisi de 200
+döndü. Rotation çalışıyor (yeni token üretiliyor) ama eskisi hemen geçersiz
+kılınmıyor, kısa bir pencerede hâlâ kabul ediliyor. Production'a geçilirse bu
+sıkılaştırılmalı: kullanılan refresh token anında invalidate edilmeli, aksi halde
+çalınmış bir token'ın rotation sonrası da bir süre işe yaraması mümkün.
