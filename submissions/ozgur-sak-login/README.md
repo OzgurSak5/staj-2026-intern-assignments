@@ -3,6 +3,21 @@
 VBT stajı kapsamında geliştirilen kimlik doğrulama (authentication) sistemi.
 Backend .NET ile yazıldı; web ve mobil client'lar aynı API'yi kullanır.
 
+## Ekran Görüntüleri
+
+### Web
+
+| Giriş | Kayıt |
+|---|---|
+| ![Giriş](docs/screenshots/login.png) | ![Kayıt](docs/screenshots/register.png) |
+
+| Profil (korumalı) |
+|---|
+| ![Profil](docs/screenshots/profile.png) |
+
+Tasarım Google Stitch ile üretildi, Stitch MCP üzerinden Claude Code ile koda
+aktarıldı. Ayrıntılar: [`web/README.md`](./web/README.md)
+
 ## Takım
 
 - **Ozgur SAK** — Backend (.NET) + Web (React)
@@ -26,8 +41,9 @@ web ve mobil onu ortak kullanır.
 
 ### Gereksinimler
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
+> .NET SDK yalnızca testleri çalıştırmak veya API'yi Docker olmadan geliştirmek
+> için gerekli; sadece ayağa kaldırmak için Docker yeterli.
 
 ### Adımlar
 
@@ -43,6 +59,7 @@ cp .env.example .env
 
 # 3. Postgres + API'yi birlikte başlat (Docker)
 docker compose up -d --build
+```
 
 > **Not:** `.env` olmadan uygulama başlamaz — `Jwt:Key` eksik veya 32 byte'tan
 > kısaysa fail-fast validasyonu devreye girer ve açıklayıcı bir hata verir.
@@ -52,14 +69,12 @@ docker compose up -d --build
 > **Migration'lar:** Container açılırken otomatik uygulanır (`MigrateAsync`).
 > Ayrıca `dotnet ef database update` çalıştırmaya gerek yok — local'de .NET SDK
 > kurulu olmasa bile proje ayağa kalkar.
-```
+
 
 API çalışınca:
 
 - **Swagger UI:** http://localhost:5075/swagger
 - **API kök:** http://localhost:5075
-
-> `dotnet ef` komutu yoksa: `dotnet tool install --global dotnet-ef`
 
 ---
 
