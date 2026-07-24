@@ -9,11 +9,11 @@ Backend .NET ile yazıldı; web ve mobil client'lar aynı API'yi kullanır.
 
 | Giriş | Kayıt |
 |---|---|
-| ![Giriş](docs/screenshots/login.png) | ![Kayıt](docs/screenshots/register.png) |
+| ![Giriş](docs/screenshots/login_web.webp) | ![Kayıt](docs/screenshots/register_web.webp) |
 
 | Profil (korumalı) |
 |---|
-| ![Profil](docs/screenshots/profile.png) |
+| ![Profil](docs/screenshots/profile_web.webp) |
 
 Tasarım Google Stitch ile üretildi, Stitch MCP üzerinden Claude Code ile koda
 aktarıldı. Ayrıntılar: [`web/README.md`](./web/README.md)
