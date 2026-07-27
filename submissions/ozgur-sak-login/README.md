@@ -78,6 +78,53 @@ API çalışınca:
 
 ---
 
+## Web Client'ı Çalıştırma
+
+Backend ayakta olmalı (yukarıdaki adımlar).
+
+```bash
+cd ../web
+npm install
+npm run dev
+```
+
+Uygulama `http://localhost:5173` adresinde açılır. Ayrıntılar:
+[`web/README.md`](./web/README.md)
+
+> **Windows/PowerShell notu:** script politikası nedeniyle `npm` yerine
+> `npm.cmd` gerekebilir.
+
+---
+
+## Mobil Client'ı Çalıştırma
+
+Backend ayakta olmalı. Kurulum ve mimari detayları: `mobile/README.md`
+*(hazırlanıyor)*
+
+---
+
+## Testler
+
+**Backend (xUnit):**
+```bash
+cd backend
+dotnet test
+```
+
+**Web E2E (Playwright):**
+```bash
+cd web
+npx playwright test
+```
+
+Test kapsamı, senaryolar ve bilinen boşluklar:
+[`docs/test-plan.md`](docs/test-plan.md)
+
+CI: her PR'da backend testleri ve web E2E testleri otomatik çalışır
+(`.github/workflows/backend-tests.yml`).
+
+---
+
 ## API Endpoint'leri
 
 Tüm istek/cevaplar JSON. Base URL: `http://localhost:5075`
