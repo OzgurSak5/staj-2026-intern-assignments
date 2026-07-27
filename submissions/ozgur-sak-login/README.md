@@ -3,6 +3,21 @@
 VBT stajı kapsamında geliştirilen kimlik doğrulama (authentication) sistemi.
 Backend .NET ile yazıldı; web ve mobil client'lar aynı API'yi kullanır.
 
+## Ekran Görüntüleri
+
+### Web
+
+| Giriş | Kayıt |
+|---|---|
+| ![Giriş](docs/screenshots/login_web.webp) | ![Kayıt](docs/screenshots/register_web.webp) |
+
+| Profil (korumalı) |
+|---|
+| ![Profil](docs/screenshots/profile_web.webp) |
+
+Tasarım Google Stitch ile üretildi, Stitch MCP üzerinden Claude Code ile koda
+aktarıldı. Ayrıntılar: [`web/README.md`](./web/README.md)
+
 ## Takım
 
 - **Ozgur SAK** — Backend (.NET) + Web (React)
@@ -26,8 +41,9 @@ web ve mobil onu ortak kullanır.
 
 ### Gereksinimler
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
+> .NET SDK yalnızca testleri çalıştırmak veya API'yi Docker olmadan geliştirmek
+> için gerekli; sadece ayağa kaldırmak için Docker yeterli.
 
 ### Adımlar
 
@@ -36,23 +52,76 @@ web ve mobil onu ortak kullanır.
 git clone https://github.com/OzgurSak5/staj-2026-intern-assignments.git
 cd staj-2026-intern-assignments/submissions/ozgur-sak-login/backend
 
-# 2. PostgreSQL'i başlat (Docker)
-docker compose up -d
+# 2. Ortam değişkenlerini hazırla
+cp .env.example .env
+# .env içindeki JWT_KEY ve POSTGRES_PASSWORD değerlerini doldur.
+# JWT_KEY en az 32 byte olmalı (HS256 gerekliliği).
 
-# 3. Veritabanı şemasını oluştur (migration'ları uygula)
-cd Auth.Api
-dotnet ef database update
-
-# 4. API'yi çalıştır
-dotnet run
+# 3. Postgres + API'yi birlikte başlat (Docker)
+docker compose up -d --build
 ```
+
+> **Not:** `.env` olmadan uygulama başlamaz — `Jwt:Key` eksik veya 32 byte'tan
+> kısaysa fail-fast validasyonu devreye girer ve açıklayıcı bir hata verir.
+> Bilinçli tercih: eksik secret'ın sessizce varsayılana düşmesindense uygulamanın
+> hiç açılmaması daha güvenli.
+
+> **Migration'lar:** Container açılırken otomatik uygulanır (`MigrateAsync`).
+> Ayrıca `dotnet ef database update` çalıştırmaya gerek yok — local'de .NET SDK
+> kurulu olmasa bile proje ayağa kalkar.
+
 
 API çalışınca:
 
 - **Swagger UI:** http://localhost:5075/swagger
 - **API kök:** http://localhost:5075
 
-> `dotnet ef` komutu yoksa: `dotnet tool install --global dotnet-ef`
+---
+
+## Web Client'ı Çalıştırma
+
+Backend ayakta olmalı (yukarıdaki adımlar).
+
+```bash
+cd ../web
+npm install
+npm run dev
+```
+
+Uygulama `http://localhost:5173` adresinde açılır. Ayrıntılar:
+[`web/README.md`](./web/README.md)
+
+> **Windows/PowerShell notu:** script politikası nedeniyle `npm` yerine
+> `npm.cmd` gerekebilir.
+
+---
+
+## Mobil Client'ı Çalıştırma
+
+Backend ayakta olmalı. Kurulum ve mimari detayları: `mobile/README.md`
+*(hazırlanıyor)*
+
+---
+
+## Testler
+
+**Backend (xUnit):**
+```bash
+cd backend
+dotnet test
+```
+
+**Web E2E (Playwright):**
+```bash
+cd web
+npx playwright test
+```
+
+Test kapsamı, senaryolar ve bilinen boşluklar:
+[`docs/test-plan.md`](docs/test-plan.md)
+
+CI: her PR'da backend testleri ve web E2E testleri otomatik çalışır
+(`.github/workflows/backend-tests.yml`).
 
 ---
 
