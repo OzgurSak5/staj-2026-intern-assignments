@@ -83,6 +83,7 @@ docker compose up -d --build
 API çalışınca:
 
 - **Swagger UI:** http://localhost:5075/swagger
+- **Postman koleksiyonu:** [`postman/Login-System-Auth-API.postman_collection.json`](postman/Login-System-Auth-API.postman_collection.json)
 - **API kök:** http://localhost:5075
 
 ---
