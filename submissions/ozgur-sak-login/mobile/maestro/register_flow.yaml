@@ -1,0 +1,18 @@
+appId: com.example.mobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "GIRIŞ YAP"
+# "Kayıt Olun" yönlendirme butonuna tıklayalım
+- tapOn:
+    text: ".*Kay.t Olun.*"
+# Kayıt Ol ekranında olduğumuzu doğrulayalım
+- assertVisible:
+    text: ".*Kay.t Ol.*"
+- assertVisible: "E-posta Adresi"
+- assertVisible: "Şifre Tekrar"
+# "Giriş Yapın" butonu ile tekrar Giriş ekranına dönelim
+- tapOn:
+    text: ".*Giri. Yap.n.*"
+- assertVisible: "GIRIŞ YAP"
+
