@@ -1,0 +1,15 @@
+appId: com.example.mobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "GIRIŞ YAP"
+- assertVisible: "E-posta Adresi"
+- assertVisible: "Şifre"
+# E-posta alanına tıklayıp geçersiz mail girelim
+- tapOn: "E-posta Adresi"
+- inputText: "test@example.com"
+# Şifre alanına tıklayıp şifre girelim
+- tapOn: "Şifre"
+- inputText: "wrongpass"
+# Giriş butonuna tıklayalım
+- tapOn: "GIRIŞ YAP"

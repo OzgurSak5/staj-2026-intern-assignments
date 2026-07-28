@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:openapi/api.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_client.dart';
+import 'package:openapi/api.dart';
+import 'package:dio/dio.dart';
 
 class AuthService {
   final DioClient _dioClient;
