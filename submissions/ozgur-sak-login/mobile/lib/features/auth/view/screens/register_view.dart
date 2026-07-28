@@ -8,7 +8,6 @@ import '../../viewmodel/cubits/auth_cubit.dart';
 import '../../viewmodel/cubits/register_cubit.dart';
 import '../../viewmodel/mixins/auth_validation_mixin.dart';
 import '../../viewmodel/mixins/register_mixin.dart';
-
 import '../../../home/view/widgets/home_avatar.dart';
 import '../widgets/auth_background.dart';
 import '../widgets/auth_button.dart';
@@ -34,7 +33,10 @@ class _RegisterViewState extends State<RegisterView>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
           onPressed: () => context.router.popForced(),
         ),
       ),
@@ -56,14 +58,19 @@ class _RegisterViewState extends State<RegisterView>
             final isLoading = state.isLoading;
             return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 32.0,
+                ),
                 child: Stack(
                   clipBehavior: Clip.none,
                   alignment: Alignment.topCenter,
                   children: [
                     // Glassmorphism Card
                     Padding(
-                      padding: const EdgeInsets.only(top: 42.0), // Room for overlapping avatar
+                      padding: const EdgeInsets.only(
+                        top: 42.0,
+                      ), // Room for overlapping avatar
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(28),
                         child: BackdropFilter(
@@ -71,7 +78,12 @@ class _RegisterViewState extends State<RegisterView>
                           child: Container(
                             width: double.infinity,
                             constraints: const BoxConstraints(maxWidth: 400),
-                            padding: const EdgeInsets.fromLTRB(28.0, 56.0, 28.0, 28.0),
+                            padding: const EdgeInsets.fromLTRB(
+                              28.0,
+                              56.0,
+                              28.0,
+                              28.0,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.55),
                               borderRadius: BorderRadius.circular(28),
@@ -132,8 +144,11 @@ class _RegisterViewState extends State<RegisterView>
                                     prefixIcon: Icons.lock_outline_rounded,
                                     obscureText: obscurePassword,
                                     enabled: !isLoading,
-                                    validator: (value) => validateConfirmPassword(
-                                        value, passwordController.text),
+                                    validator: (value) =>
+                                        validateConfirmPassword(
+                                          value,
+                                          passwordController.text,
+                                        ),
                                   ),
                                   const SizedBox(height: 24),
                                   AuthButton(
@@ -156,10 +171,7 @@ class _RegisterViewState extends State<RegisterView>
                       ),
                     ),
                     // Overlapping top circular dark green avatar
-                    const Positioned(
-                      top: 0,
-                      child: HomeAvatar(size: 84),
-                    ),
+                    const Positioned(top: 0, child: HomeAvatar(size: 84)),
                   ],
                 ),
               ),

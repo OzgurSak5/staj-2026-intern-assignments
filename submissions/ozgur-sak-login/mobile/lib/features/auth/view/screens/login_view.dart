@@ -8,7 +8,6 @@ import '../../viewmodel/cubits/auth_cubit.dart';
 import '../../viewmodel/cubits/login_cubit.dart';
 import '../../viewmodel/mixins/auth_validation_mixin.dart';
 import '../../viewmodel/mixins/login_mixin.dart';
-
 import '../../../home/view/widgets/home_avatar.dart';
 import '../widgets/auth_background.dart';
 import '../widgets/auth_button.dart';
@@ -46,14 +45,19 @@ class _LoginViewState extends State<LoginView>
           final isLoading = state.isLoading;
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 32.0,
+              ),
               child: Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.topCenter,
                 children: [
                   // Glassmorphism Card
                   Padding(
-                    padding: const EdgeInsets.only(top: 42.0), // Room for overlapping avatar
+                    padding: const EdgeInsets.only(
+                      top: 42.0,
+                    ), // Room for overlapping avatar
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(28),
                       child: BackdropFilter(
@@ -61,7 +65,12 @@ class _LoginViewState extends State<LoginView>
                         child: Container(
                           width: double.infinity,
                           constraints: const BoxConstraints(maxWidth: 400),
-                          padding: const EdgeInsets.fromLTRB(28.0, 56.0, 28.0, 28.0),
+                          padding: const EdgeInsets.fromLTRB(
+                            28.0,
+                            56.0,
+                            28.0,
+                            28.0,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.55),
                             borderRadius: BorderRadius.circular(28),
@@ -126,8 +135,9 @@ class _LoginViewState extends State<LoginView>
                                   text: 'Hesabınız yok mu?',
                                   actionText: 'Kayıt Olun',
                                   enabled: !isLoading,
-                                  onPressed: () =>
-                                      context.router.push(const RegisterRoute()),
+                                  onPressed: () => context.router.push(
+                                    const RegisterRoute(),
+                                  ),
                                 ),
                               ],
                             ),
@@ -137,10 +147,7 @@ class _LoginViewState extends State<LoginView>
                     ),
                   ),
                   // Overlapping top circular dark green avatar
-                  const Positioned(
-                    top: 0,
-                    child: HomeAvatar(size: 84),
-                  ),
+                  const Positioned(top: 0, child: HomeAvatar(size: 84)),
                 ],
               ),
             ),
