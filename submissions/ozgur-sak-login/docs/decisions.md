@@ -160,7 +160,7 @@ bildiğimi ele aldım, bilmediğime karışmadım.
 [Authorize] başarısız olunca JWT middleware boş gövdeli 401 dönüyordu — orada exception
 fırlamadığı için handler'a hiç uğramıyor. Client bazen JSON bazen boş gövde görürse iki
 tarafta da özel durum yazmak gerekir. AddProblemDetails() zaten kayıtlıydı, eksik olan
-tetikleyiciydi.s
+tetikleyiciydi.
 
 ## Web: token saklama, localStorage
 Access ve refresh token'ları localStorage'da tutuyorum, cookie değil. Backend zaten

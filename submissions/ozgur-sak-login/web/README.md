@@ -78,8 +78,6 @@ Mobil client ile aynı tasarım dili kullanılır.
 
 - Token'lar `localStorage`'da tutuluyor; XSS'e karşı `httpOnly` cookie kadar
   güvenli değil. Gerekçe ve trade-off için `../docs/decisions.md`.
-- Form doğrulaması tarayıcının HTML5 doğrulamasıyla sınırlı (react-hook-form/zod
-  kullanılmadı).
 - API tipleri elle yazıldı; mobil tarafta OpenAPI codegen kullanılıyor.
 - Form doğrulaması react-hook-form/zod yerine tarayıcının native HTML5
   doğrulamasıyla yapılıyor; küçük form sayısı (3 form) için ek kütüphane
