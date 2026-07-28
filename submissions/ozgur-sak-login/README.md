@@ -18,6 +18,15 @@ Backend .NET ile yazıldı; web ve mobil client'lar aynı API'yi kullanır.
 Tasarım Google Stitch ile üretildi, Stitch MCP üzerinden Claude Code ile koda
 aktarıldı. Ayrıntılar: [`web/README.md`](./web/README.md)
 
+### Mobil
+
+| Giriş | Kayıt | Profil |
+|---|---|---|
+| ![Giriş](docs/screenshots/login_mobile.webp) | ![Kayıt](docs/screenshots/register_mobile.webp) | ![Profil](docs/screenshots/profile_mobile.webp) |
+
+Tasarım aynı Google Stitch kaynağından, Nisa tarafından Flutter'a uyarlandı.
+Ayrıntılar: [`mobile/README.md`](./mobile/README.md)
+
 ## Takım
 
 - **Ozgur SAK** — Backend (.NET) + Web (React)
@@ -98,8 +107,16 @@ Uygulama `http://localhost:5173` adresinde açılır. Ayrıntılar:
 
 ## Mobil Client'ı Çalıştırma
 
-Backend ayakta olmalı. Kurulum ve mimari detayları: `mobile/README.md`
-*(hazırlanıyor)*
+Backend ayakta olmalı.
+
+```bash
+cd ../mobile
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
+```
+
+Ayrıntılar (mimari, MVVM/Cubit, Maestro E2E): [`mobile/README.md`](./mobile/README.md)
 
 ---
 
@@ -122,6 +139,14 @@ Test kapsamı, senaryolar ve bilinen boşluklar:
 
 CI: her PR'da backend testleri ve web E2E testleri otomatik çalışır
 (`.github/workflows/backend-tests.yml`).
+
+**Mobil (widget testleri):**
+```bash
+cd mobile
+flutter test
+```
+
+**Mobil E2E (Maestro):** kurulum ve komutlar için [`mobile/README.md`](./mobile/README.md)
 
 ---
 

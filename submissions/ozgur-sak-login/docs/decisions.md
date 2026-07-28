@@ -186,3 +186,11 @@ local .NET SDK gerekmiyor. Projeyi klonlayan kişi tek komutla ayağa kaldırıy
 Sınırı biliyorum. Birden fazla API instance'ı aynı anda açılırsa ikisi de
 migration çalıştırmaya kalkar. Tek instance'lık bu kapsamda sorun değil, ama
 ölçeklenirse migration ayrı bir deploy adımına taşınmalı.
+
+## Access token konumu: bellek değil, localStorage
+Spec access token'ın bellekte (React state/context) tutulmasını, sadece
+refresh'in kalıcı depoda olmasını öneriyor. Access token'ı bellekte tutsaydık
+her sayfa yenilemesinde kaybolur, kullanıcı görünüşte "çıkış yapmış" gibi
+görünürdü — bunu önlemek "sayfa açılışında refresh token'la sessiz yenileme"
+akışı gerektirir, bu projede zaman kısıtı nedeniyle uygulanmadı. Access token
+da localStorage'da tutuldu; XSS riski documented (bkz. yukarıdaki madde).

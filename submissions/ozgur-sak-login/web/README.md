@@ -81,3 +81,6 @@ Mobil client ile aynı tasarım dili kullanılır.
 - Form doğrulaması tarayıcının HTML5 doğrulamasıyla sınırlı (react-hook-form/zod
   kullanılmadı).
 - API tipleri elle yazıldı; mobil tarafta OpenAPI codegen kullanılıyor.
+- Form doğrulaması react-hook-form/zod yerine tarayıcının native HTML5
+  doğrulamasıyla yapılıyor; küçük form sayısı (3 form) için ek kütüphane
+  getirisi düşük görüldü, zaman kısıtı içinde bilinçli bir kapsam kararı.

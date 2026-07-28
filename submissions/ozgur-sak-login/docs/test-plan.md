@@ -9,7 +9,7 @@ tanımlar.
 |---|---|---|---|
 | Entegrasyon (API) | xUnit + WebApplicationFactory | Gerçek Postgres'e karşı HTTP istek/cevap | Tamamlandı - 5 test |
 | E2E (Web) | Playwright | Tarayıcıda tam kullanıcı akışı | Tamamlandı - 4 test (Chromium/Firefox/WebKit) |
-| E2E (Mobil) | Maestro | Emülatörde tam kullanıcı akışı | Nisa çalışıyor |
+| E2E (Mobil) | Maestro | Emülatörde tam kullanıcı akışı | Tamamlandı - Nisa tarafından yazıldı (login_flow.yaml, register_flow.yaml) |
 
 ## Test Senaryoları
 
@@ -75,10 +75,13 @@ Refresh token tek kullanımlık invalidation: Rotation çalışıyor ama kullan�
 refresh token anında geçersiz kılınmıyor; kısa bir pencerede tekrar kabul
 edilebiliyor. Ayrıntı için decisions.md.
 
-Mobil E2E: Maestro flow Nisa tarafından yazılıyor.
 
 ## CI
 
-Testlerin CI'da çalışması planlanıyor; GitHub Actions workflow'ları repo
-kökündeki .github/ altına gitmek zorunda olduğu için organizasyon sahibiyle
-koordinasyon gerekiyor.
+Backend testleri ve web E2E testleri her pull request'te GitHub Actions
+üzerinde otomatik çalışır (`.github/workflows/backend-tests.yml`). Postgres
+servis konteyneri ile gerçek veritabanına karşı test ediliyor; web job'ı
+backend'i CI içinde ayrıca ayağa kaldırıp test kullanıcısını seed ediyor.
+
+Mobil testler (Maestro) şu an CI'da çalışmıyor — emülatör gerektirdiği için
+ayrı bir kurulum gerekiyor, ileriye dönük iyileştirme olarak not edildi.
