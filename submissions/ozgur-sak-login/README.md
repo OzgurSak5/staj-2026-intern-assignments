@@ -3,6 +3,13 @@
 VBT stajı kapsamında geliştirilen kimlik doğrulama (authentication) sistemi.
 Backend .NET ile yazıldı; web ve mobil client'lar aynı API'yi kullanır.
 
+## Demo Videosu
+
+▶️ [YouTube'da izle](https://www.youtube.com/watch?v=dz9Wh19u1HQ)
+
+Mimari, tek komutla kurulum, web ve mobil demo, otomatik token yenileme,
+testler ve CI.
+
 ## Ekran Görüntüleri
 
 ### Web
